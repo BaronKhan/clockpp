@@ -68,6 +68,7 @@
 #include <unordered_map>
 #include <cstring>
 #include <stack>
+#include <mutex>
 
 #ifdef _PTHREAD_H
 #include <sys/types.h>
@@ -87,11 +88,26 @@ typedef std::chrono::nanoseconds Ns;
 struct alignas(64) Timer
 {
   TimePoint m_time;
-  int m_line;
+  int       m_line;
 };
 
-static std::unordered_map<std::string,
-  std::unordered_map<long int, std::stack<Timer>>> s_start_times;
+template<class K, class V>
+struct alignas(64) concurrent_map
+{
+  V& operator[] (const K& k)
+  {
+    m_mutex.lock();
+    V& v = m_map[k];
+    m_mutex.unlock();
+    return v;
+  }
+
+  std::mutex                m_mutex;
+  std::unordered_map<K, V>  m_map;
+};
+
+static concurrent_map<std::string,
+  concurrent_map<long int, std::stack<Timer>>> s_start_times;
 
 inline std::string get_location(const char *file, const char *function)
 {
