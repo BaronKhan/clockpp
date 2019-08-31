@@ -116,14 +116,12 @@ inline std::string get_location(const char *file, const char *function)
   return buff;
 }
 
-inline long int get_thread_id()
-{
+
 #ifdef _PTHREAD_H
-  return pthread_self();
+inline long int get_thread_id() { return pthread_self(); }
 #else
-  return 0;
+constexpr inline long int get_thread_id() { return 0L; }
 #endif
-}
 
 inline void clock_start(const char *file, const char *function, int line)
 {
@@ -158,8 +156,8 @@ inline unsigned long long clock_stop(const char *file, const char *function,
 }
 
 template<class C, class ...P>
-unsigned long long clock_func(C callable, const char *file, int line,
-                              const char *f_name, P... params)
+unsigned long long clock_func(const C& callable, const char *file, int line,
+                              const char *f_name, const P&... params)
 {
   const bool is_lambda = strchr(f_name, '[');
   const auto thread_id = get_thread_id();
