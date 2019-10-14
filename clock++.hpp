@@ -156,8 +156,9 @@ inline unsigned long long clock_stop(const char *file, const char *function,
 }
 
 template<class C, class ...P>
-unsigned long long clock_func(const C& callable, const char *file, int line,
-                              const char *f_name, const P&... params)
+static unsigned long long clock_func(const C& callable, const char *file,
+                                     int line, const char *f_name,
+                                     const P&... params)
 {
   const bool is_lambda = strchr(f_name, '[');
   const auto thread_id = get_thread_id();
